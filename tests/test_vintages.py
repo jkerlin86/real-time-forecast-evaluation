@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
@@ -63,6 +65,9 @@ def test_growth_is_log_difference_percent():
     assert abs(g.iloc[1] - 100.0 * 0.0953102) < 1e-4
 
 
+@pytest.mark.skipif(
+    not Path("data/raw/pcpiMvMd.xlsx").exists(),
+    reason="raw data not downloaded")
 def test_load_rtdsm_matrix_pcpi_shape_and_span():
     m = load_rtdsm_matrix("data/raw/pcpiMvMd.xlsx", "M")
     assert m.shape[1] == 336
@@ -97,6 +102,9 @@ def test_load_alfred_matrix_monthly_snapshots(tmp_path):
     assert m.loc[jan, pd.Period("2020-05", freq="M")] == 102.0
 
 
+@pytest.mark.skipif(
+    not Path("data/raw/alfred_rsafs_vintages.csv").exists(),
+    reason="raw data not downloaded")
 def test_load_alfred_matrix_rsafs_shape_and_span():
     m = load_alfred_matrix("data/raw/alfred_rsafs_vintages.csv", "M")
     assert m.shape == (417, 305)

@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import pandas as pd
+import pytest
 
 from realtime_forecast.bridge import (
     monthly_vintage_for_quarter,
@@ -16,6 +19,9 @@ def test_monthly_vintage_alignment_is_middle_month():
     )
 
 
+@pytest.mark.skipif(
+    not Path("data/raw/pcpiMvMd.xlsx").exists(),
+    reason="raw data not downloaded")
 def test_bridge_runs_on_real_matrices():
     pce = load_rtdsm_matrix("data/raw/pconQvQd.xlsx", "Q")
     cpi = load_rtdsm_matrix("data/raw/pcpiMvMd.xlsx", "M")
