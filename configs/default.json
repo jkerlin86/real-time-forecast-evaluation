@@ -1,1 +1,78 @@
-{"ar":{"max_p_monthly":12,"max_p_quarterly":4,"min_train_monthly":60,"min_train_quarterly":40},"bootstrap":{"reps":2000,"seed":20261110},"bridge":{"eval_end_vintage":"2025Q4","eval_start_vintage":"2000Q1","indicator":"pce","min_train_quarters":40},"indicators":{"cpi":{"alfred_series":"CPIAUCSL","bootstrap_block":12,"eval_end_vintage":"2025-12","eval_start_vintage":"2000-01","freq":"M","hac_lags":12,"label":"Consumer Price Index (CPI-U, all items)","maturity_vintages":24,"originator":"U.S. Bureau of Labor Statistics","rtdsm_file":"pcpiMvMd.xlsx","rtdsm_variable":"PCPI"},"pce":{"alfred_series":"PCEPI","bootstrap_block":8,"eval_end_vintage":"2025Q4","eval_start_vintage":"2000Q1","freq":"Q","hac_lags":4,"label":"PCE Price Index (chain-type, quarterly)","maturity_vintages":8,"originator":"U.S. Bureau of Economic Analysis","rtdsm_file":"pconQvQd.xlsx","rtdsm_variable":"PCON"},"ppi":{"alfred_series":"PPIACO (all commodities, NSA; concept differs, see methods)","bootstrap_block":12,"eval_end_vintage":"2025-12","eval_start_vintage":"2000-01","freq":"M","hac_lags":12,"label":"Producer Price Index (finished goods)","maturity_vintages":24,"originator":"U.S. Bureau of Labor Statistics","rtdsm_file":"pppiMvMd.xlsx","rtdsm_variable":"PPPI"}},"retail_sales":{"alfred_series":"RSAFS","label":"Retail Sales (Advance Retail Sales: Retail Trade and Food Services)","originator":"U.S. Census Bureau","status":"not measured in this build: no keyless vintage matrix exists (see the C4 data gate note); the ALFRED API route in scripts/download_data.py builds the matrix when a reader supplies a free FRED API key"},"target_vintage":"latest vintage in the retrieved matrix (treated as final; itself still revisable)"}
+{
+  "ar": {
+    "max_p_monthly": 12,
+    "max_p_quarterly": 4,
+    "min_train_monthly": 60,
+    "min_train_quarterly": 40
+  },
+  "bootstrap": {
+    "reps": 2000,
+    "seed": 20261110
+  },
+  "bridge": {
+    "eval_end_vintage": "2025Q4",
+    "eval_start_vintage": "2000Q1",
+    "indicator": "pce",
+    "min_train_quarters": 40
+  },
+  "indicators": {
+    "cpi": {
+      "alfred_series": "CPIAUCSL",
+      "bootstrap_block": 12,
+      "eval_end_vintage": "2025-12",
+      "eval_start_vintage": "2000-01",
+      "freq": "M",
+      "hac_lags": 12,
+      "label": "Consumer Price Index (CPI-U, all items)",
+      "maturity_vintages": 24,
+      "originator": "U.S. Bureau of Labor Statistics",
+      "rtdsm_file": "pcpiMvMd.xlsx",
+      "rtdsm_variable": "PCPI"
+    },
+    "pce": {
+      "alfred_series": "PCEPI",
+      "bootstrap_block": 8,
+      "eval_end_vintage": "2025Q4",
+      "eval_start_vintage": "2000Q1",
+      "freq": "Q",
+      "hac_lags": 4,
+      "label": "PCE Price Index (chain-type, quarterly)",
+      "maturity_vintages": 8,
+      "originator": "U.S. Bureau of Economic Analysis",
+      "rtdsm_file": "pconQvQd.xlsx",
+      "rtdsm_variable": "PCON"
+    },
+    "ppi": {
+      "alfred_series": "PPIACO (all commodities, NSA; concept differs, see methods)",
+      "bootstrap_block": 12,
+      "eval_end_vintage": "2025-12",
+      "eval_start_vintage": "2000-01",
+      "freq": "M",
+      "hac_lags": 12,
+      "label": "Producer Price Index (finished goods)",
+      "maturity_vintages": 24,
+      "originator": "U.S. Bureau of Labor Statistics",
+      "rtdsm_file": "pppiMvMd.xlsx",
+      "rtdsm_variable": "PPPI"
+    },
+    "retail": {
+      "alfred_file": "alfred_rsafs_vintages.csv",
+      "alfred_series": "RSAFS",
+      "bootstrap_block": 12,
+      "eval_end_vintage": "2025-12",
+      "eval_start_vintage": "2000-01",
+      "freq": "M",
+      "hac_lags": 12,
+      "label": "Retail Sales (Advance Retail Sales: Retail Trade and Food Services)",
+      "maturity_vintages": 24,
+      "originator": "U.S. Census Bureau"
+    }
+  },
+  "retail_sales": {
+    "alfred_series": "RSAFS",
+    "label": "Retail Sales (Advance Retail Sales: Retail Trade and Food Services)",
+    "originator": "U.S. Census Bureau",
+    "status": "measured: added as indicators.retail in the follow-on run of 2026-11-10, after the owner registered the free FRED API key at his own direction; the ALFRED vintage record for RSAFS begins 2001-06, so its first usable evaluation origin is the 2001-06 vintage (see the C4 data gate note addendum)"
+  },
+  "target_vintage": "latest vintage in the retrieved matrix (treated as final; itself still revisable)"
+}

@@ -14,6 +14,7 @@ R = json.loads((ROOT / "reports/results.json").read_text())
 
 C = R["indicators"]["cpi"]
 P = R["indicators"]["ppi"]
+T = R["indicators"]["retail"]
 E = R["indicators"]["pce"]
 B = R["bridge"]
 G = R["synthetic_gate"]
@@ -29,7 +30,12 @@ def pct(x, nd=1):
 
 def rev_table() -> str:
     rows = []
-    for label, v in [("CPI", C), ("PPI (finished goods)", P), ("PCE prices", E)]:
+    for label, v in [
+        ("CPI", C),
+        ("PPI (finished goods)", P),
+        ("Retail sales", T),
+        ("PCE prices", E),
+    ]:
         s = v["revisions"]["stats"]
         rows.append(
             f"| {label} | {s['n']} | {f(s['mean_revision'])} | {f(s['mean_abs_revision'])} | "
@@ -41,7 +47,12 @@ def rev_table() -> str:
 
 def eval_table() -> str:
     rows = []
-    specs = [("CPI", C), ("PPI (finished goods)", P), ("PCE prices", E)]
+    specs = [
+        ("CPI", C),
+        ("PPI (finished goods)", P),
+        ("Retail sales", T),
+        ("PCE prices", E),
+    ]
     for label, v in specs:
         e = v["evaluation"]
         sc, dm, bt = e["scores"], e["diebold_mariano"], e["bootstrap"]
@@ -69,7 +80,7 @@ never have seen. That grading flatters the track record twice over: the
 model is estimated on numbers that did not exist yet, and it is scored
 against a target that kept moving after the forecast was made. This project
 rebuilds the evaluation honestly. It assembles full vintage matrices for
-headline price indicators (each cell is the value as published on a given
+headline indicators (each cell is the value as published on a given
 date), measures how first releases are revised, and then runs one fixed
 benchmark forecasting specification twice at every forecast origin: once on
 the vintage actually available at the time, and once on final data. The gap
@@ -77,50 +88,66 @@ between the two track records is the flattery, measured.
 
 ## Headline findings
 
-- **First-release price growth is revised by a little, on average, but the
+- **First-release growth is revised by a little, on average, but the
   dispersion is the story.** Mean revisions of monthly growth are close to
-  zero for CPI ({f(C['revisions']['stats']['mean_revision'])} pp) and PPI
-  ({f(P['revisions']['stats']['mean_revision'])} pp), while mean absolute
+  zero for CPI ({f(C['revisions']['stats']['mean_revision'])} pp), PPI
+  ({f(P['revisions']['stats']['mean_revision'])} pp), and retail sales
+  ({f(T['revisions']['stats']['mean_revision'])} pp), while mean absolute
   revisions are {f(C['revisions']['stats']['mean_abs_revision'])} pp (CPI),
-  {f(P['revisions']['stats']['mean_abs_revision'])} pp (PPI), and
+  {f(P['revisions']['stats']['mean_abs_revision'])} pp (PPI),
   {f(E['revisions']['stats']['mean_abs_revision'])} pp for quarterly PCE
-  inflation. {pct(C['revisions']['stats']['share_unrevised'])} of CPI growth
+  inflation, and {f(T['revisions']['stats']['mean_abs_revision'])} pp for
+  retail sales, the largest of the four.
+  {pct(C['revisions']['stats']['share_unrevised'])} of CPI growth
   observations and {pct(P['revisions']['stats']['share_unrevised'])} of PPI
-  observations are never revised at all; PCE observations always move.
-- **Part of the first release is predictable error, not news.** Regressing
-  the revision on the first release gives a slope of
+  observations are never revised at all; PCE and retail sales observations
+  always move.
+- **Part of the first release is predictable error, not news, in the
+  monthly price indexes.** Regressing the revision on the first release
+  gives a slope of
   {f(P['revisions']['noise_vs_news']['slope_on_first_release'], 3)} for PPI
   (p = {P['revisions']['noise_vs_news']['slope_p']:.3g}) and
   {f(C['revisions']['noise_vs_news']['slope_on_first_release'], 3)} for CPI
   (p = {C['revisions']['noise_vs_news']['slope_p']:.3g}); a pure-news process
-  would give zero. Revisions are also larger in contractions: mean absolute
-  revisions of {f(P['revisions']['by_phase']['contraction']['mean_abs_revision'])} pp
-  (PPI) and {f(C['revisions']['by_phase']['contraction']['mean_abs_revision'])} pp
-  (CPI) against {f(P['revisions']['by_phase']['expansion']['mean_abs_revision'])} pp
-  and {f(C['revisions']['by_phase']['expansion']['mean_abs_revision'])} pp in
+  would give zero. The retail sales slope
+  ({f(T['revisions']['noise_vs_news']['slope_on_first_release'], 3)}) is not
+  significant (p = {T['revisions']['noise_vs_news']['slope_p']:.3g}), and
+  neither is the PCE slope at 5%. Revisions are also larger in contractions:
+  mean absolute revisions of {f(P['revisions']['by_phase']['contraction']['mean_abs_revision'])} pp
+  (PPI), {f(T['revisions']['by_phase']['contraction']['mean_abs_revision'])} pp
+  (retail sales), and {f(C['revisions']['by_phase']['contraction']['mean_abs_revision'])} pp
+  (CPI) against {f(P['revisions']['by_phase']['expansion']['mean_abs_revision'])} pp,
+  {f(T['revisions']['by_phase']['expansion']['mean_abs_revision'])} pp, and
+  {f(C['revisions']['by_phase']['expansion']['mean_abs_revision'])} pp in
   expansions.
 - **The flattery is real but small for a one-step benchmark.** Scored
   against the same target (the latest vintage, treated as final), the
   final-data track record beats the honest one on every specification, by
   {abs(C['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp of
   RMSE for CPI, {abs(P['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp
-  for PPI, {abs(E['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp for
+  for PPI, {abs(T['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp
+  for retail sales, {abs(E['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp for
   the PCE autoregression, and
   {abs(B['scores']['rmse_gap_naive_minus_realtime']):.3f} pp for the PCE
   bridge. For CPI the gap is statistically distinguishable from zero
   (Diebold-Mariano p = {C['evaluation']['diebold_mariano']['dm_p_value']:.3g};
   90% bootstrap interval
   [{f(C['evaluation']['bootstrap']['gap_p05'])}, {f(C['evaluation']['bootstrap']['gap_p95'])}]);
-  for the other three it is not. Evaluating on final data overstates what a
-  forecaster could have achieved, but for short-horizon price benchmarks the
-  overstatement is a few thousandths of a percentage point of RMSE, far
-  smaller than the revision risk in the target itself.
+  for the other four it is not. Evaluating on final data overstates what a
+  forecaster could have achieved, but for short-horizon benchmarks the
+  overstatement is small next to the revision risk in the target itself:
+  even the largest gap, retail sales at
+  {abs(T['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp,
+  sits against a first-release revision band of plus or minus
+  {f(T['risk_band_pp'], 2)} pp for the same series.
 - **The honest uncertainty is at release time.** The revision-risk table
   below is the number a decision-maker should carry: the 90th percentile of
   the absolute revision of first-release growth. A first-release CPI growth
   print should be read as plus or minus {f(C['risk_band_pp'], 2)} pp; a PPI
   print, plus or minus {f(P['risk_band_pp'], 2)} pp; a quarterly PCE print,
-  plus or minus {f(E['risk_band_pp'], 2)} pp.
+  plus or minus {f(E['risk_band_pp'], 2)} pp; and a first-release retail
+  sales print, plus or minus {f(T['risk_band_pp'], 2)} pp, the widest band
+  of the four.
 
 ## Revision statistics (growth scale, maturity-restricted)
 
@@ -139,37 +166,41 @@ treated as final, with the standing caveat that it is itself still revisable.
 |---|---|---|---|---|---|---|---|
 {eval_table()}
 
+Retail sales origins run from the {T['evaluation']['origin_window'][0]}
+vintage, not 2000-01: the ALFRED vintage record for RSAFS begins in
+{T['coverage']['first_vintage']}. Every retail output states that window
+rather than narrowing the comparison silently.
+
 ## Data and the licensing gate
 
-The four longlist indicators are CPI, PPI, retail sales, and PCE prices.
-Three are measured here from full vintage matrices published by the Federal
-Reserve Bank of Philadelphia's Real-Time Data Set for Macroeconomists
-(RTDSM): CPI ({C['coverage']['n_vintages']} monthly vintages,
+The four longlist indicators are CPI, PPI, retail sales, and PCE prices,
+and all four are measured. Three come from full vintage matrices published
+by the Federal Reserve Bank of Philadelphia's Real-Time Data Set for
+Macroeconomists (RTDSM): CPI ({C['coverage']['n_vintages']} monthly vintages,
 {C['coverage']['first_vintage']} to {C['coverage']['last_vintage']}), PPI
 finished goods ({P['coverage']['n_vintages']} monthly vintages), and PCE
 prices ({E['coverage']['n_vintages']} quarterly vintages,
-{E['coverage']['first_vintage']} to {E['coverage']['last_vintage']}). The
-underlying observations are U.S. Bureau of Labor Statistics and Bureau of
-Economic Analysis statistics, public domain at the originator.
+{E['coverage']['first_vintage']} to {E['coverage']['last_vintage']}).
 
-Retail sales is documented but **not measured**, and the reason is a data
-finding, not an omission: no keyless vintage matrix for retail sales
-exists. The RTDSM carries no retail variable, and the Census Bureau's
-MARTS archive holds release documents (three-month windows), not history
-snapshots. The canonical vintage source is ALFRED (series RSAFS, U.S.
-Census Bureau), whose API requires a free registered key. Per the project
-gate, no key was registered with anyone's personal information; the repo
-ships the ALFRED download route (`scripts/download_data.py --alfred`,
-key from the reader's own environment) and the pipeline is
-indicator-generic, so retail joins the day a key is supplied. The keyless
-ALFRED graph-CSV endpoints also failed from the build environment (HTTP
-403 to automated fetching; the API host itself answers and is key-gated).
+Retail sales has no keyless vintage matrix (the RTDSM carries no retail
+variable, and the Census Bureau's MARTS archive holds release documents
+with three-month windows, not history snapshots), so it comes from ALFRED
+(series RSAFS, U.S. Census Bureau). The project owner registered the free
+FRED API key at his own direction on 2026-11-10; `scripts/download_data.py
+--alfred` (key from the reader's own environment, never committed) pulls
+every ALFRED vintage interval for the series, and the loader rebuilds
+{T['coverage']['n_vintages']} monthly snapshots
+({T['coverage']['first_vintage']} to {T['coverage']['last_vintage']}) from
+them. The keyless ALFRED graph-CSV endpoints failed from the build
+environment (HTTP 403 to automated fetching; the API host itself answers
+and is key-gated).
 
 ALFRED series references for all four indicators are recorded in
-`data/README.md` and `configs/default.json`. FRED's terms (three per-series
-copyright tiers; 2024 prohibitions on API caching for third-party provision
-and on ML-training use) are why this project redistributes RTDSM values and
-derived statistics rather than any FRED download.
+`data/README.md` and `configs/default.json`. All four originators are U.S.
+federal statistical agencies; the underlying observations are public domain
+at the originator, and no series in this project sits in FRED's
+pre-approval copyright tier. The gate record, including the FRED API terms
+finding from the key registration, is in the project's data gate note.
 
 ## Validation gate
 
@@ -189,6 +220,7 @@ column trips the assertion. If either test fails, the build fails.
 ```bash
 pip install -e ".[dev,notebooks]"
 python scripts/download_data.py        # RTDSM matrices (keyless)
+python scripts/download_data.py --alfred  # ALFRED intervals (needs FRED_API_KEY in the environment)
 python scripts/run_analysis.py         # writes reports/results.json
 python scripts/make_figures.py
 python scripts/make_notebooks.py && python scripts/execute_notebooks.py
@@ -211,17 +243,22 @@ EXEC = f"""# Executive summary
 **Question.** How much of a forecasting track record is real? When a model
 is estimated and graded on final, revised data, part of its measured
 accuracy was never available to anyone in real time. This project measures
-that flattery for headline price indicators, and measures the revision
+that flattery for headline indicators, and measures the revision
 risk a decision-maker actually faces at release time.
 
-**Data.** Full vintage matrices from the Federal Reserve Bank of
-Philadelphia's Real-Time Data Set for Macroeconomists: CPI and PPI
+**Data.** Full vintage matrices for four indicators. CPI and PPI
 (finished goods), {C['coverage']['n_vintages']} monthly vintages from
-{C['coverage']['first_vintage']} to {C['coverage']['last_vintage']}; PCE
+{C['coverage']['first_vintage']} to {C['coverage']['last_vintage']}, and PCE
 prices, {E['coverage']['n_vintages']} quarterly vintages from
-{E['coverage']['first_vintage']} to {E['coverage']['last_vintage']}.
-Retail sales, the fourth longlist indicator, has no keyless vintage
-matrix (see the gate note); it is documented and scripted, not measured.
+{E['coverage']['first_vintage']} to {E['coverage']['last_vintage']}, come
+from the Federal Reserve Bank of Philadelphia's Real-Time Data Set for
+Macroeconomists. Retail sales, the fourth indicator, comes from ALFRED
+(series RSAFS, U.S. Census Bureau) under the owner's registered free FRED
+API key: {T['coverage']['n_vintages']} monthly snapshots,
+{T['coverage']['first_vintage']} to {T['coverage']['last_vintage']}. Its
+ALFRED vintage record begins in {T['coverage']['first_vintage']}, so its
+evaluation origins run {T['evaluation']['origin_window'][0]} to
+{T['evaluation']['origin_window'][1]}, not from 2000-01.
 
 **Revisions.** On the growth scale, maturity-restricted: CPI mean revision
 {f(C['revisions']['stats']['mean_revision'])} pp, mean absolute
@@ -232,14 +269,21 @@ minus {f(C['risk_band_pp'], 2)} pp. PPI: mean
 {f(P['risk_band_pp'], 2)} pp. PCE (quarterly): mean
 {f(E['revisions']['stats']['mean_revision'])} pp, mean absolute
 {f(E['revisions']['stats']['mean_abs_revision'])} pp, band plus or minus
-{f(E['risk_band_pp'], 2)} pp. Revisions are partly predictable from the
-first release (noise, not pure news): slopes
+{f(E['risk_band_pp'], 2)} pp. Retail sales: mean
+{f(T['revisions']['stats']['mean_revision'])} pp, mean absolute
+{f(T['revisions']['stats']['mean_abs_revision'])} pp, band plus or minus
+{f(T['risk_band_pp'], 2)} pp, the largest revisions and the widest band of
+the four. Revisions are partly predictable from the first release (noise,
+not pure news) in the monthly price indexes: slopes
 {f(C['revisions']['noise_vs_news']['slope_on_first_release'], 3)} (CPI,
 p = {C['revisions']['noise_vs_news']['slope_p']:.3g}) and
 {f(P['revisions']['noise_vs_news']['slope_on_first_release'], 3)} (PPI,
 p = {P['revisions']['noise_vs_news']['slope_p']:.3g}); the PCE slope
 ({f(E['revisions']['noise_vs_news']['slope_on_first_release'], 3)}) is not
-significant at 5% (p = {E['revisions']['noise_vs_news']['slope_p']:.3g}).
+significant at 5% (p = {E['revisions']['noise_vs_news']['slope_p']:.3g}),
+and neither is the retail sales slope
+({f(T['revisions']['noise_vs_news']['slope_on_first_release'], 3)},
+p = {T['revisions']['noise_vs_news']['slope_p']:.3g}).
 Revisions are larger in NBER contractions where the phase sample supports
 reporting.
 
@@ -253,14 +297,20 @@ RMSE gaps (naive minus real-time) of
 p = {C['evaluation']['diebold_mariano']['dm_p_value']:.3g}),
 {f(P['evaluation']['scores']['rmse_gap_naive_minus_realtime'])} pp (PPI,
 p = {P['evaluation']['diebold_mariano']['dm_p_value']:.3g}),
+{f(T['evaluation']['scores']['rmse_gap_naive_minus_realtime'])} pp (retail
+sales, {T['evaluation']['n_origins']} origins,
+p = {T['evaluation']['diebold_mariano']['dm_p_value']:.3g}),
 {f(E['evaluation']['scores']['rmse_gap_naive_minus_realtime'])} pp (PCE
 AR, p = {E['evaluation']['diebold_mariano']['dm_p_value']:.3g}), and
 {f(B['scores']['rmse_gap_naive_minus_realtime'])} pp (PCE bridge,
 p = {B['diebold_mariano']['dm_p_value']:.3g}). Only the CPI gap is
-statistically distinguishable from zero. Read plainly: for one-step price
-benchmarks the flattery is small and mostly inside the noise, while the
-revision risk in the target variable itself is an order of magnitude
-larger. Both facts matter, and final-data evaluation hides the second one
+statistically distinguishable from zero. Read plainly: the flattery is
+small and mostly inside the noise, while the revision risk in the target
+variable itself is an order of magnitude larger, a comparison that holds
+for retail sales too (a gap of
+{abs(T['evaluation']['scores']['rmse_gap_naive_minus_realtime']):.3f} pp
+against a revision band of plus or minus {f(T['risk_band_pp'], 2)} pp).
+Both facts matter, and final-data evaluation hides the second one
 entirely.
 
 **Gate.** Synthetic planted-revision recovery and a per-origin leakage

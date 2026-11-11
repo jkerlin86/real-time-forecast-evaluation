@@ -1,5 +1,5 @@
 """Build the two analysis notebooks (unexecuted). Execute with
-scripts/execute_notebooks.py. Notebooks read the package and the raw RTDSM
+scripts/execute_notebooks.py. Notebooks read the package and the raw data
 files directly, so every number they show is recomputed, not copied.
 """
 
@@ -15,7 +15,7 @@ NB = ROOT / "notebooks"
 SETUP = """import sys
 sys.path.insert(0, "../src")
 import pandas as pd
-from realtime_forecast.vintages import load_rtdsm_matrix
+from realtime_forecast.vintages import load_alfred_matrix, load_rtdsm_matrix
 from realtime_forecast.revisions import (
     growth_revision_frame, revision_stats, revision_stats_by_phase,
     noise_vs_news, vintage_coverage,
@@ -39,9 +39,10 @@ def nb1():
         md(
             "# Vintage matrices and the anatomy of revisions\n\n"
             "Every cell of a vintage matrix is a number as it was actually published "
-            "on a given date. This notebook loads the three matrices used in the "
+            "on a given date. This notebook loads the four matrices used in the "
             "project (CPI and PPI monthly, PCE prices quarterly, from the Federal "
-            "Reserve Bank of Philadelphia's Real-Time Data Set for Macroeconomists) "
+            "Reserve Bank of Philadelphia's Real-Time Data Set for Macroeconomists; "
+            "retail sales monthly, rebuilt from ALFRED intervals for series RSAFS) "
             "and measures how first releases are later revised."
         ),
         code(SETUP),
@@ -50,6 +51,7 @@ def nb1():
             "matrices = {\n"
             "    'cpi': load_rtdsm_matrix('../data/raw/pcpiMvMd.xlsx', 'M'),\n"
             "    'ppi': load_rtdsm_matrix('../data/raw/pppiMvMd.xlsx', 'M'),\n"
+            "    'retail': load_alfred_matrix('../data/raw/alfred_rsafs_vintages.csv', 'M'),\n"
             "    'pce': load_rtdsm_matrix('../data/raw/pconQvQd.xlsx', 'Q'),\n"
             "}\n"
             "pd.DataFrame({k: vintage_coverage(m) for k, m in matrices.items()}).T"
@@ -65,6 +67,7 @@ def nb1():
             "frames = {\n"
             "    'cpi': growth_revision_frame(matrices['cpi'], 24),\n"
             "    'ppi': growth_revision_frame(matrices['ppi'], 24),\n"
+            "    'retail': growth_revision_frame(matrices['retail'], 24),\n"
             "    'pce': growth_revision_frame(matrices['pce'], 8),\n"
             "}\n"
             "pd.DataFrame({k: revision_stats(f) for k, f in frames.items()}).T"
@@ -87,6 +90,7 @@ def nb1():
             "pd.DataFrame({\n"
             "    'cpi': noise_vs_news(frames['cpi'], 12),\n"
             "    'ppi': noise_vs_news(frames['ppi'], 12),\n"
+            "    'retail': noise_vs_news(frames['retail'], 12),\n"
             "    'pce': noise_vs_news(frames['pce'], 4),\n"
             "}).T"
         ),
@@ -136,6 +140,21 @@ def nb2():
             "origins_p = [c for c in ppi.columns if pd.Period('2000-01', freq='M') <= c <= pd.Period('2025-12', freq='M')]\n"
             "fc_ppi = run_evaluation(ppi, origins_p, max_p=12, min_train=60)\n"
             "score(fc_ppi), diebold_mariano(fc_ppi), block_bootstrap_gap(fc_ppi, block=12)"
+        ),
+        md(
+            "## Retail sales (monthly origins; the window starts at the 2001-06 vintage)\n\n"
+            "Retail sales comes from ALFRED (series RSAFS), whose vintage record "
+            "begins with the 2001-06 vintage, so its usable origins run 2001-06 "
+            "to 2025-12 rather than from 2000-01. The code below asks for the "
+            "common 2000-01 to 2025-12 window; the origins that exist in the "
+            "matrix are the ones that run."
+        ),
+        code(
+            "retail = load_alfred_matrix('../data/raw/alfred_rsafs_vintages.csv', 'M')\n"
+            "origins_r = [c for c in retail.columns if pd.Period('2000-01', freq='M') <= c <= pd.Period('2025-12', freq='M')]\n"
+            "print('retail origins:', origins_r[0], '->', origins_r[-1], '=', len(origins_r))\n"
+            "fc_retail = run_evaluation(retail, origins_r, max_p=12, min_train=60)\n"
+            "score(fc_retail), diebold_mariano(fc_retail), block_bootstrap_gap(fc_retail, block=12)"
         ),
         md("## PCE prices, autoregressive arm (quarterly origins)"),
         code(

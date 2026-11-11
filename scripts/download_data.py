@@ -12,12 +12,19 @@ Secondary route (requires the reader's own free FRED API key, read from the
 FRED_API_KEY environment variable; never commit a key): the ALFRED API
 vintage endpoints. This route is what adds the fourth indicator, retail
 sales (RSAFS), whose vintage matrix has no keyless source. It writes
-long-format vintage observations for any listed series.
+long-format vintage observations for any listed series: one row per
+(observation, value-effective interval), where the interval is the
+ALFRED realtime span [vintage_date, realtime_end] over which the value
+was the published one. The monthly snapshot matrix is reconstructed from
+these intervals by realtime_forecast.vintages.load_alfred_matrix.
 
-Licensing note: FRED's terms bar caching/archiving FRED content for
-third-party provision and ML-training use; the keyed route is for the
-reader's own analysis. The RTDSM files are published by the Federal
-Reserve Bank of Philadelphia for research use with citation.
+Licensing note: the FRED API terms page shown at key registration carries
+no explicit caching/redistribution wording; its Property Rights clause
+notes that some series are third-party owned, which does not apply to the
+federal statistical-agency series used here (all public domain at the
+originator). The keyed route is for the reader's own analysis with the
+reader's own key. The RTDSM files are published by the Federal Reserve
+Bank of Philadelphia for research use with citation.
 """
 
 from __future__ import annotations
@@ -70,33 +77,58 @@ def download_rtdsm(raw_dir: str) -> dict:
 def download_alfred(raw_dir: str, api_key: str) -> None:
     """Fetch ALFRED vintage observations for the four series (long format).
 
-    Uses the FRED API series/observations endpoint with vintage dates:
-    first the list of vintage dates, then one request per vintage is
-    avoided by using output=1 (all vintages in one response) where the API
-    supports it. Writes one CSV per series: date, vintage_date, value.
+    Uses the FRED API series/observations endpoint with the realtime span
+    opened to all of history (realtime_start 1776-07-04, realtime_end
+    9999-12-31), which returns one row per (observation, value-effective
+    interval) across every vintage, paginated at 100,000 rows. (The
+    endpoint's default realtime window returns only the current vintage,
+    and its rows carry realtime_start/realtime_end, not a vintage_date
+    field.) Writes one CSV per series: date, vintage_date (the interval's
+    realtime_start, the vintage at which the value took effect),
+    realtime_end, value.
     """
     import csv
 
     base = "https://api.stlouisfed.org/fred/series/observations"
     s = _session()
     for series in ALFRED_SERIES:
-        params = {
-            "series_id": series,
-            "api_key": api_key,
-            "file_type": "json",
-            "output": 1,
-        }
-        r = s.get(base, params=params, timeout=120)
-        r.raise_for_status()
-        payload = r.json()
-        rows = payload.get("observations", [])
+        rows = []
+        offset = 0
+        while True:
+            params = {
+                "series_id": series,
+                "api_key": api_key,
+                "file_type": "json",
+                "realtime_start": "1776-07-04",
+                "realtime_end": "9999-12-31",
+                "limit": 100000,
+                "offset": offset,
+            }
+            r = s.get(base, params=params, timeout=300)
+            r.raise_for_status()
+            payload = r.json()
+            page = payload.get("observations", [])
+            rows.extend(page)
+            offset += len(page)
+            if len(page) < 100000 or offset >= int(payload.get("count", 0)):
+                break
+            time.sleep(1)
+        seen = set()
+        unique = []
+        for obs in rows:
+            key = (obs["date"], obs["realtime_start"])
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(obs)
+        unique.sort(key=lambda o: (o["date"], o["realtime_start"]))
         path = os.path.join(raw_dir, f"alfred_{series.lower()}_vintages.csv")
         with open(path, "w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["date", "vintage_date", "value"])
-            for obs in rows:
-                w.writerow([obs["date"], obs.get("vintage_date", ""), obs["value"]])
-        print(f"alfred {series}: {len(rows)} vintage observations -> {path}")
+            w.writerow(["date", "vintage_date", "realtime_end", "value"])
+            for obs in unique:
+                w.writerow([obs["date"], obs["realtime_start"], obs["realtime_end"], obs["value"]])
+        print(f"alfred {series}: {len(unique)} vintage-interval rows -> {path}")
         time.sleep(1)
 
 

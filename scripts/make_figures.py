@@ -16,8 +16,13 @@ import pandas as pd  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
-ORDER = ["cpi", "ppi", "pce"]
-TITLES = {"cpi": "CPI", "ppi": "PPI (finished goods)", "pce": "PCE prices"}
+ORDER = ["cpi", "ppi", "retail", "pce"]
+TITLES = {
+    "cpi": "CPI",
+    "ppi": "PPI (finished goods)",
+    "retail": "Retail sales",
+    "pce": "PCE prices",
+}
 
 
 def main() -> None:
@@ -26,7 +31,7 @@ def main() -> None:
     figdir.mkdir(exist_ok=True)
 
     # 1. Revision distributions
-    fig, axes = plt.subplots(1, 3, figsize=(11, 3.4), sharex=False)
+    fig, axes = plt.subplots(1, 4, figsize=(13.5, 3.4), sharex=False)
     for ax, key in zip(axes, ORDER, strict=True):
         frame = pd.read_csv(ROOT / f"data/processed/{key}_revisions.csv")
         rev = frame["revision_latest_minus_first"].to_numpy()
@@ -58,8 +63,8 @@ def main() -> None:
     plt.close(fig)
 
     # 3. Honest vs naive RMSE (AR arms + PCE bridge)
-    fig, ax = plt.subplots(figsize=(8.5, 3.8))
-    labels = ["CPI AR", "PPI AR", "PCE AR", "PCE bridge"]
+    fig, ax = plt.subplots(figsize=(9.5, 3.8))
+    labels = ["CPI AR", "PPI AR", "Retail AR", "PCE AR", "PCE bridge"]
     rt = [results["indicators"][k]["evaluation"]["scores"]["realtime_rmse"] for k in ORDER]
     rt.append(results["bridge"]["scores"]["realtime_rmse"])
     nv = [results["indicators"][k]["evaluation"]["scores"]["naive_rmse"] for k in ORDER]
@@ -86,6 +91,20 @@ def main() -> None:
     ax.set_title("CPI: cumulative loss differential (negative = final data flatters)")
     fig.tight_layout()
     fig.savefig(figdir / "fig_cpi_cumulative_loss_diff.png", dpi=150)
+    plt.close(fig)
+
+    # 5. Cumulative squared-error difference, retail sales (naive minus real-time)
+    fig, ax = plt.subplots(figsize=(8.5, 3.6))
+    fc = pd.read_csv(ROOT / "data/processed/retail_forecasts.csv")
+    d = fc["naive_error"] ** 2 - fc["realtime_error"] ** 2
+    w0, w1 = results["indicators"]["retail"]["evaluation"]["origin_window"]
+    ax.plot(np.cumsum(d), color="#30506e")
+    ax.axhline(0, color="k", lw=0.8)
+    ax.set_xlabel(f"Forecast origin ({w0} to {w1} vintages, in order)")
+    ax.set_ylabel("Cumulative squared-error difference")
+    ax.set_title("Retail sales: cumulative loss differential (negative = final data flatters)")
+    fig.tight_layout()
+    fig.savefig(figdir / "fig_retail_cumulative_loss_diff.png", dpi=150)
     plt.close(fig)
 
     print("figures written to", figdir)

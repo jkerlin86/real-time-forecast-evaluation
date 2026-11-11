@@ -35,7 +35,7 @@ from realtime_forecast.revisions import (  # noqa: E402
     vintage_coverage,
 )
 from realtime_forecast.synthetic import make_synthetic_matrix  # noqa: E402
-from realtime_forecast.vintages import load_rtdsm_matrix  # noqa: E402
+from realtime_forecast.vintages import load_alfred_matrix, load_rtdsm_matrix  # noqa: E402
 
 
 def _clean(obj):
@@ -64,7 +64,10 @@ def main() -> None:
         "retail_sales": config["retail_sales"],
     }
     for key, cfg in config["indicators"].items():
-        matrix = load_rtdsm_matrix(ROOT / "data/raw" / cfg["rtdsm_file"], cfg["freq"])
+        if "alfred_file" in cfg:
+            matrix = load_alfred_matrix(ROOT / "data/raw" / cfg["alfred_file"], cfg["freq"])
+        else:
+            matrix = load_rtdsm_matrix(ROOT / "data/raw" / cfg["rtdsm_file"], cfg["freq"])
         matrices[key] = matrix
         freq = cfg["freq"]
         frame = growth_revision_frame(matrix, min_age_vintages=cfg["maturity_vintages"])

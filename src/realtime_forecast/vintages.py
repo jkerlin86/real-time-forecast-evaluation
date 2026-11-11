@@ -71,6 +71,75 @@ def load_rtdsm_matrix(path: str, freq: str) -> pd.DataFrame:
     return matrix
 
 
+def load_alfred_matrix(path: str, freq: str = "M") -> pd.DataFrame:
+    """Load an ALFRED long-format vintage file into a vintage matrix.
+
+    The file (written by ``scripts/download_data.py --alfred``) holds one row
+    per (observation, value-effective interval): ``date``, ``vintage_date``
+    (the interval's realtime_start, the vintage at which the value took
+    effect), ``realtime_end``, ``value``. ALFRED vintage dates are release
+    dates and are irregularly spaced (for RSAFS, 326 of them between
+    2001-06-13 and 2026-10-15). The matrix columns are monthly snapshots:
+    one column per month from the first to the last vintage month, where a
+    month's snapshot is the state as of the last vintage date on or before
+    that month's end. That is the same monthly-snapshot structure the RTDSM
+    matrices carry, so every downstream function treats the two sources
+    identically. Only monthly series are supported (the ALFRED-sourced
+    indicator in this project, retail sales, is monthly).
+    """
+    if freq != "M":
+        raise ValueError("load_alfred_matrix supports monthly series only")
+    raw = pd.read_csv(path, dtype=str)
+    raw.columns = [str(c).strip() for c in raw.columns]
+    obs = pd.PeriodIndex(pd.to_datetime(raw["date"]).dt.to_period("M"), freq="M")
+    # ALFRED spells "still in effect" as realtime_end 9999-12-31, outside the
+    # pandas nanosecond timestamp range; map it to a far-future sentinel.
+    end_text = raw["realtime_end"].replace("9999-12-31", "2200-01-01")
+    starts = pd.to_datetime(raw["vintage_date"])
+    ends = pd.to_datetime(end_text)
+    if starts.isna().any() or ends.isna().any():
+        raise ValueError(f"Unparseable vintage dates in {path}")
+    values = pd.to_numeric(raw["value"], errors="coerce")
+    frame = pd.DataFrame(
+        {"obs": obs, "start": starts, "end": ends, "value": values.to_numpy(dtype=float)}
+    )
+    if frame.duplicated(subset=["obs", "start"]).any():
+        raise ValueError(f"Duplicate (observation, vintage) intervals in {path}")
+
+    # All date arithmetic below is int64 nanoseconds since the epoch, so
+    # comparisons never mix object and datetime64 dtypes.
+    vintage_dates = np.sort(pd.DatetimeIndex(frame["start"]).unique().asi8)
+    columns = pd.period_range(
+        pd.Period(pd.Timestamp(vintage_dates[0]), freq="M"),
+        pd.Period(pd.Timestamp(vintage_dates[-1]), freq="M"),
+        freq="M",
+    )
+    # Snapshot date for each column month: the last vintage date on or
+    # before the month's end (vintage dates sit at midnight, month ends
+    # are end-of-day, so the comparison is exact).
+    month_ends = np.array([c.end_time.value for c in columns], dtype=np.int64)
+    pos = np.searchsorted(vintage_dates, month_ends, side="right") - 1
+    if (pos < 0).any():
+        raise ValueError("Column month precedes the first vintage date")
+    cutoffs = vintage_dates[pos]
+
+    index = pd.PeriodIndex(sorted(frame["obs"].unique()), freq="M")
+    matrix = pd.DataFrame(np.nan, index=index, columns=columns, dtype=float)
+    for obs_period, group in frame.groupby("obs"):
+        group = group.sort_values("start")
+        starts_o = pd.DatetimeIndex(group["start"]).asi8
+        ends_o = pd.DatetimeIndex(group["end"]).asi8
+        vals_o = group["value"].to_numpy(dtype=float)
+        j = np.searchsorted(starts_o, cutoffs, side="right") - 1
+        jj = np.maximum(j, 0)
+        col_vals = np.where((j >= 0) & (ends_o[jj] >= cutoffs), vals_o[jj], np.nan)
+        matrix.loc[obs_period, :] = col_vals
+    matrix = matrix.sort_index(axis=0).sort_index(axis=1)
+    if matrix.index.has_duplicates or matrix.columns.has_duplicates:
+        raise ValueError(f"Duplicate obs or vintage labels in {path}")
+    return matrix
+
+
 def as_of(matrix: pd.DataFrame, vintage: pd.Period) -> pd.Series:
     """Return the series exactly as known in ``vintage``.
 

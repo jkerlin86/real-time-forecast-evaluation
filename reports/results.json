@@ -310,13 +310,116 @@
           "share_of_reps_gap_negative": 0.793
         }
       }
+    },
+    "retail": {
+      "label": "Retail Sales (Advance Retail Sales: Retail Trade and Food Services)",
+      "originator": "U.S. Census Bureau",
+      "alfred_series": "RSAFS",
+      "freq": "M",
+      "coverage": {
+        "n_observations": 417,
+        "n_vintages": 305,
+        "first_vintage": "2001-06",
+        "last_vintage": "2026-10",
+        "first_obs_in_first_vintage": "1992-01",
+        "last_obs_in_first_vintage": "2001-05",
+        "first_obs_in_latest_vintage": "1992-01",
+        "last_obs_in_latest_vintage": "2026-09",
+        "cells_populated": 80816
+      },
+      "revisions": {
+        "maturity_vintages": 24,
+        "stats": {
+          "n": 392,
+          "mean_revision": 0.025799859930415003,
+          "mean_abs_revision": 0.392928171147229,
+          "median_abs_revision": 0.315877118431495,
+          "sd_revision": 0.5254069462010601,
+          "share_revised_up": 0.5612244897959183,
+          "share_revised_down": 0.4387755102040816,
+          "share_unrevised": 0.0,
+          "p90_abs_revision": 0.8351070047616477,
+          "corr_first_revision": -0.08206383346304776
+        },
+        "by_phase": {
+          "expansion": {
+            "n": 361,
+            "mean_revision": 0.027784011630478875,
+            "mean_abs_revision": 0.37708306316476925,
+            "median_abs_revision": 0.2958568770436656,
+            "sd_revision": 0.49485454658687034,
+            "share_revised_up": 0.5678670360110804,
+            "share_revised_down": 0.43213296398891965,
+            "share_unrevised": 0.0,
+            "p90_abs_revision": 0.8177740744213329,
+            "corr_first_revision": 0.025196593532565034,
+            "reported": true
+          },
+          "contraction": {
+            "n": 31,
+            "mean_revision": 0.002694093358703466,
+            "mean_abs_revision": 0.5774470092655501,
+            "median_abs_revision": 0.45709881135657326,
+            "sd_revision": 0.8116109930023955,
+            "share_revised_up": 0.4838709677419355,
+            "share_revised_down": 0.5161290322580645,
+            "share_unrevised": 0.0,
+            "p90_abs_revision": 0.8925158069180237,
+            "corr_first_revision": -0.37223597248284646,
+            "reported": true
+          }
+        },
+        "noise_vs_news": {
+          "n": 392,
+          "intercept": 0.034467782961541904,
+          "slope_on_first_release": -0.02526173969137605,
+          "slope_se_hac": 0.017189109819282688,
+          "slope_t": -1.469636296292523,
+          "slope_p": 0.1416602844203354,
+          "r_squared": 0.006734472762650823
+        }
+      },
+      "risk_band_pp": 0.8351070047616477,
+      "evaluation": {
+        "origin_window": [
+          "2001-06",
+          "2025-12"
+        ],
+        "n_origins": 295,
+        "scores": {
+          "n_origins": 295,
+          "realtime_rmse": 2.310758051100232,
+          "realtime_mae": 0.9989962327789869,
+          "naive_rmse": 2.2074455564970408,
+          "naive_mae": 0.9896334400983012,
+          "rmse_gap_naive_minus_realtime": -0.10331249460319114
+        },
+        "diebold_mariano": {
+          "n": 295,
+          "mean_loss_diff_naive_minus_realtime": -0.46678688582601413,
+          "dm_statistic": -1.1116126993086313,
+          "dm_p_value": 0.26721290659533947,
+          "lag": 1
+        },
+        "bootstrap": {
+          "reps": 2000,
+          "block": 12,
+          "seed": 20261110,
+          "gap_p05": -0.1806114983549908,
+          "gap_p50": -0.09573299369828858,
+          "gap_p95": 0.013247458635714868,
+          "gap_ci90_low": -0.1806114983549908,
+          "gap_ci90_high": 0.013247458635714868,
+          "share_of_reps_gap_negative": 0.9155
+        }
+      }
     }
   },
   "retail_sales": {
     "alfred_series": "RSAFS",
     "label": "Retail Sales (Advance Retail Sales: Retail Trade and Food Services)",
     "originator": "U.S. Census Bureau",
-    "status": "not measured in this build: no keyless vintage matrix exists (see the C4 data gate note); the ALFRED API route in scripts/download_data.py builds the matrix when a reader supplies a free FRED API key"
+    "status": "measured: added as indicators.retail in the follow-on run of 2026-11-10, after the owner registered the free FRED API key at his own direction; the ALFRED vintage record for RSAFS begins 2001-06, so its first usable evaluation origin is the 2001-06 vintage (see the C4 data gate note addendum)"
   },
   "bridge": {
     "indicator": "pce",

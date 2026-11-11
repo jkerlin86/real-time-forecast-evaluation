@@ -9,13 +9,23 @@ g = 100 x log(x_t / x_{t-1}), computed inside a single vintage column
 (never across columns).
 
 **Indicators.** CPI-U all items (RTDSM PCPI, BLS), PPI finished goods
-(RTDSM PPPI, BLS), PCE chain-type price index (RTDSM PCON, BEA). The PPI
+(RTDSM PPPI, BLS), PCE chain-type price index (RTDSM PCON, BEA), and
+retail sales (ALFRED RSAFS, U.S. Census Bureau). The PPI
 concept is the finished-goods index, the headline PPI before the 2014
 final-demand redesign and the concept the RTDSM archives; it is not
 ALFRED's PPIACO (all commodities, not seasonally adjusted) and not the
 final-demand index. PCE is quarterly because the RTDSM carries PCE prices
-at quarterly vintages. Retail sales is excluded from measurement for a
-documented data reason (see `data/README.md` and the project gate note).
+at quarterly vintages. Retail sales is sourced from ALFRED rather than the
+RTDSM for a documented data reason (the RTDSM carries no retail variable;
+see `data/README.md` and the project gate note): the scripted ALFRED route
+pulls every value-effective interval for RSAFS, and the loader rebuilds
+monthly snapshots from them, one column per month holding the state as of
+the last ALFRED vintage date on or before that month's end. Retail then
+runs through the identical pipeline with the identical settings as the
+other monthly indicators. ALFRED's vintage record for RSAFS begins
+2001-06-13, so the retail matrix has 305 monthly snapshots (2001-06 to
+2026-10) against 336 for CPI and PPI, and its first usable evaluation
+origin is the 2001-06 vintage.
 
 ## Revision analysis
 
@@ -55,7 +65,10 @@ p = 0..12 (monthly) or p = 0..4 (quarterly); p = 0 is the historical-mean
 forecast. Estimated by least squares, recursively, at every origin.
 
 **Origins and targets.** An origin is a vintage in the window
-2000-01 to 2025-12 (monthly) or 2000Q1 to 2025Q4 (quarterly). At origin v,
+2000-01 to 2025-12 (monthly) or 2000Q1 to 2025Q4 (quarterly). Retail
+sales is the one exception, stated wherever it is reported: ALFRED's
+vintage record for RSAFS begins with the 2001-06 vintage, so its usable
+origins are 2001-06 to 2025-12 (295 origins). At origin v,
 the target period is the first observation not yet published in v
 (one-step-ahead). Minimum training lengths: 60 growth observations
 (monthly), 40 (quarterly).
@@ -125,3 +138,12 @@ Both are automated tests in `tests/`. A failed gate fails the build.
    national accounts, which are larger and less frequent than monthly
    price revisions; the quarterly maturity restriction (8 vintages, two
    years) is shorter relative to that process than the monthly one.
+6. The retail matrix is a monthly-snapshot reconstruction of ALFRED's
+   release-date record: a month holding more than one RSAFS vintage date
+   contributes only its last state as a column. RSAFS has 326 vintage
+   dates across 305 snapshot months, so the coarsening is small, but the
+   within-month revision detail is not in the matrix.
+7. Retail's evaluation window starts in 2001-06, not 2000-01, because
+   that is where ALFRED's RSAFS vintage record starts; cross-indicator
+   comparisons involving retail cover a slightly shorter, later window
+   than the CPI and PPI comparisons.
