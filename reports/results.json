@@ -1,0 +1,362 @@
+{
+  "generated_date_et": "2026-11-10",
+  "target_vintage": "latest vintage in the retrieved matrix (treated as final; itself still revisable)",
+  "indicators": {
+    "cpi": {
+      "label": "Consumer Price Index (CPI-U, all items)",
+      "originator": "U.S. Bureau of Labor Statistics",
+      "alfred_series": "CPIAUCSL",
+      "freq": "M",
+      "coverage": {
+        "n_observations": 957,
+        "n_vintages": 336,
+        "first_vintage": "1998-11",
+        "last_vintage": "2026-10",
+        "first_obs_in_first_vintage": "1948-01",
+        "last_obs_in_first_vintage": "1998-10",
+        "first_obs_in_latest_vintage": "1947-01",
+        "last_obs_in_latest_vintage": "2026-09",
+        "cells_populated": 265056
+      },
+      "revisions": {
+        "maturity_vintages": 24,
+        "stats": {
+          "n": 932,
+          "mean_revision": 0.0005825201555934095,
+          "mean_abs_revision": 0.031287963580450474,
+          "median_abs_revision": 0.0,
+          "sd_revision": 0.06164974491274186,
+          "share_revised_up": 0.2907725321888412,
+          "share_revised_down": 0.18991416309012876,
+          "share_unrevised": 0.51931330472103,
+          "p90_abs_revision": 0.10998707944496207,
+          "corr_first_revision": -0.17014482644629653
+        },
+        "by_phase": {
+          "expansion": {
+            "n": 901,
+            "mean_revision": 0.0002661255374979109,
+            "mean_abs_revision": 0.030344113946381732,
+            "median_abs_revision": 0.0,
+            "sd_revision": 0.06107747023991391,
+            "share_revised_up": 0.28190899001109876,
+            "share_revised_down": 0.18091009988901222,
+            "share_unrevised": 0.537180910099889,
+            "p90_abs_revision": 0.10810811863725966,
+            "corr_first_revision": -0.17885323488010973,
+            "reported": true
+          },
+          "contraction": {
+            "n": 31,
+            "mean_revision": 0.00977837663636904,
+            "mean_abs_revision": 0.05872049649322247,
+            "median_abs_revision": 0.05069464129817615,
+            "sd_revision": 0.07709735393586484,
+            "share_revised_up": 0.5483870967741935,
+            "share_revised_down": 0.45161290322580644,
+            "share_unrevised": 0.0,
+            "p90_abs_revision": 0.11376107955438158,
+            "corr_first_revision": -0.018216283343207126,
+            "reported": true
+          }
+        },
+        "noise_vs_news": {
+          "n": 932,
+          "intercept": 0.009279162058487448,
+          "slope_on_first_release": -0.030252913677223457,
+          "slope_se_hac": 0.008994301457769442,
+          "slope_t": -3.3635645657718576,
+          "slope_p": 0.0007694283597856118,
+          "r_squared": 0.02894926196644032
+        }
+      },
+      "risk_band_pp": 0.10998707944496207,
+      "evaluation": {
+        "origin_window": [
+          "2000-01",
+          "2025-12"
+        ],
+        "n_origins": 310,
+        "scores": {
+          "n_origins": 310,
+          "realtime_rmse": 0.27843288473002253,
+          "realtime_mae": 0.1967725608781082,
+          "naive_rmse": 0.27293891591767727,
+          "naive_mae": 0.18926659202426166,
+          "rmse_gap_naive_minus_realtime": -0.005493968812345262
+        },
+        "diebold_mariano": {
+          "n": 310,
+          "mean_loss_diff_naive_minus_realtime": -0.003029219476765114,
+          "dm_statistic": -2.2667352277810897,
+          "dm_p_value": 0.02409737592312733,
+          "lag": 1
+        },
+        "bootstrap": {
+          "reps": 2000,
+          "block": 12,
+          "seed": 20261110,
+          "gap_p05": -0.010257141295227874,
+          "gap_p50": -0.00577331399239589,
+          "gap_p95": -0.001097110750401727,
+          "gap_ci90_low": -0.010257141295227874,
+          "gap_ci90_high": -0.001097110750401727,
+          "share_of_reps_gap_negative": 0.9805
+        }
+      }
+    },
+    "pce": {
+      "label": "PCE Price Index (chain-type, quarterly)",
+      "originator": "U.S. Bureau of Economic Analysis",
+      "alfred_series": "PCEPI",
+      "freq": "Q",
+      "coverage": {
+        "n_observations": 319,
+        "n_vintages": 245,
+        "first_vintage": "1965Q4",
+        "last_vintage": "2026Q4",
+        "first_obs_in_first_vintage": "1947Q1",
+        "last_obs_in_first_vintage": "1965Q2",
+        "first_obs_in_latest_vintage": "1947Q1",
+        "last_obs_in_latest_vintage": "2026Q3",
+        "cells_populated": 47572
+      },
+      "revisions": {
+        "maturity_vintages": 8,
+        "stats": {
+          "n": 310,
+          "mean_revision": 0.016088777631605784,
+          "mean_abs_revision": 0.13309363368762311,
+          "median_abs_revision": 0.10365633815031827,
+          "sd_revision": 0.17716708519203359,
+          "share_revised_up": 0.5516129032258065,
+          "share_revised_down": 0.4483870967741935,
+          "share_unrevised": 0.0,
+          "p90_abs_revision": 0.3035417180946329,
+          "corr_first_revision": -0.1434961779502762
+        },
+        "by_phase": {
+          "expansion": {
+            "n": 299,
+            "mean_revision": 0.019051525928623712,
+            "mean_abs_revision": 0.1334290576021723,
+            "median_abs_revision": 0.1045314439145067,
+            "sd_revision": 0.17714372235336487,
+            "share_revised_up": 0.5551839464882943,
+            "share_revised_down": 0.44481605351170567,
+            "share_unrevised": 0.0,
+            "p90_abs_revision": 0.30381179405516234,
+            "corr_first_revision": -0.16689635943295528,
+            "reported": true
+          },
+          "contraction": {
+            "n": 11,
+            "mean_revision": -0.06444410789642703,
+            "mean_abs_revision": 0.1239762018285139,
+            "median_abs_revision": 0.061510640545629824,
+            "sd_revision": 0.1654602990925039,
+            "share_revised_up": 0.45454545454545453,
+            "share_revised_down": 0.5454545454545454,
+            "share_unrevised": 0.0,
+            "p90_abs_revision": 0.25220379781343505,
+            "corr_first_revision": 0.18839786905816605,
+            "reported": false
+          }
+        },
+        "noise_vs_news": {
+          "n": 310,
+          "intercept": 0.04494438833401505,
+          "slope_on_first_release": -0.038520095369400216,
+          "slope_se_hac": 0.01981641593373019,
+          "slope_t": -1.9438477421052645,
+          "slope_p": 0.051913814588537735,
+          "r_squared": 0.020591153086336966
+        }
+      },
+      "risk_band_pp": 0.3035417180946329,
+      "evaluation": {
+        "origin_window": [
+          "2000Q1",
+          "2025Q4"
+        ],
+        "n_origins": 104,
+        "scores": {
+          "n_origins": 104,
+          "realtime_rmse": 0.4243523962716471,
+          "realtime_mae": 0.2798194087774395,
+          "naive_rmse": 0.41280111422382443,
+          "naive_mae": 0.27831271191776297,
+          "rmse_gap_naive_minus_realtime": -0.011551282047822686
+        },
+        "diebold_mariano": {
+          "n": 104,
+          "mean_loss_diff_naive_minus_realtime": -0.009670196317058066,
+          "dm_statistic": -0.8618479812968742,
+          "dm_p_value": 0.3907732394203607,
+          "lag": 1
+        },
+        "bootstrap": {
+          "reps": 2000,
+          "block": 8,
+          "seed": 20261110,
+          "gap_p05": -0.02366001417683759,
+          "gap_p50": -0.011324663607139351,
+          "gap_p95": 0.003635083584804751,
+          "gap_ci90_low": -0.02366001417683759,
+          "gap_ci90_high": 0.003635083584804751,
+          "share_of_reps_gap_negative": 0.899
+        }
+      }
+    },
+    "ppi": {
+      "label": "Producer Price Index (finished goods)",
+      "originator": "U.S. Bureau of Labor Statistics",
+      "alfred_series": "PPIACO (all commodities, NSA; concept differs, see methods)",
+      "freq": "M",
+      "coverage": {
+        "n_observations": 957,
+        "n_vintages": 336,
+        "first_vintage": "1998-11",
+        "last_vintage": "2026-10",
+        "first_obs_in_first_vintage": "1947-04",
+        "last_obs_in_first_vintage": "1998-10",
+        "first_obs_in_latest_vintage": "1947-04",
+        "last_obs_in_latest_vintage": "2026-09",
+        "cells_populated": 264257
+      },
+      "revisions": {
+        "maturity_vintages": 24,
+        "stats": {
+          "n": 929,
+          "mean_revision": 0.001262586898033359,
+          "mean_abs_revision": 0.0802977734695708,
+          "median_abs_revision": 0.0,
+          "sd_revision": 0.1782769680053382,
+          "share_revised_up": 0.21205597416576966,
+          "share_revised_down": 0.18299246501614638,
+          "share_unrevised": 0.604951560818084,
+          "p90_abs_revision": 0.2812618258801201,
+          "corr_first_revision": -0.3615093341909685
+        },
+        "by_phase": {
+          "expansion": {
+            "n": 898,
+            "mean_revision": 0.0015555812528018664,
+            "mean_abs_revision": 0.07440013152210094,
+            "median_abs_revision": 0.0,
+            "sd_revision": 0.16797609071614447,
+            "share_revised_up": 0.19933184855233854,
+            "share_revised_down": 0.1759465478841871,
+            "share_unrevised": 0.6247216035634744,
+            "p90_abs_revision": 0.2619342348473278,
+            "corr_first_revision": -0.4043340100881448,
+            "reported": true
+          },
+          "contraction": {
+            "n": 31,
+            "mean_revision": -0.0072247979594543595,
+            "mean_abs_revision": 0.2511391434317621,
+            "median_abs_revision": 0.17548995436782389,
+            "sd_revision": 0.3733761245702655,
+            "share_revised_up": 0.5806451612903226,
+            "share_revised_down": 0.3870967741935484,
+            "share_unrevised": 0.03225806451612903,
+            "p90_abs_revision": 0.7334554731447929,
+            "corr_first_revision": -0.11729620022725366,
+            "reported": true
+          }
+        },
+        "noise_vs_news": {
+          "n": 929,
+          "intercept": 0.025309115358972407,
+          "slope_on_first_release": -0.09798152856054888,
+          "slope_se_hac": 0.020445874953165903,
+          "slope_t": -4.792239450988969,
+          "slope_p": 1.6492988870882427e-06,
+          "r_squared": 0.13068899870719752
+        }
+      },
+      "risk_band_pp": 0.2812618258801201,
+      "evaluation": {
+        "origin_window": [
+          "2000-01",
+          "2025-12"
+        ],
+        "n_origins": 312,
+        "scores": {
+          "n_origins": 312,
+          "realtime_rmse": 0.7778638284103069,
+          "realtime_mae": 0.5669985547176787,
+          "naive_rmse": 0.7689375980525014,
+          "naive_mae": 0.5579960139047541,
+          "rmse_gap_naive_minus_realtime": -0.008926230357805487
+        },
+        "diebold_mariano": {
+          "n": 312,
+          "mean_loss_diff_naive_minus_realtime": -0.01380710585038904,
+          "dm_statistic": -0.8306819563882295,
+          "dm_p_value": 0.40679056879039344,
+          "lag": 1
+        },
+        "bootstrap": {
+          "reps": 2000,
+          "block": 12,
+          "seed": 20261110,
+          "gap_p05": -0.02732414777868416,
+          "gap_p50": -0.010093906760252902,
+          "gap_p95": 0.012059658858829592,
+          "gap_ci90_low": -0.02732414777868416,
+          "gap_ci90_high": 0.012059658858829592,
+          "share_of_reps_gap_negative": 0.793
+        }
+      }
+    }
+  },
+  "retail_sales": {
+    "alfred_series": "RSAFS",
+    "label": "Retail Sales (Advance Retail Sales: Retail Trade and Food Services)",
+    "originator": "U.S. Census Bureau",
+    "status": "not measured in this build: no keyless vintage matrix exists (see the C4 data gate note); the ALFRED API route in scripts/download_data.py builds the matrix when a reader supplies a free FRED API key"
+  },
+  "bridge": {
+    "indicator": "pce",
+    "origin_window": [
+      "2000Q1",
+      "2025Q4"
+    ],
+    "n_origins": 67,
+    "scores": {
+      "n_origins": 67,
+      "realtime_rmse": 0.29577984324649875,
+      "realtime_mae": 0.21109859638331097,
+      "naive_rmse": 0.25931171410007203,
+      "naive_mae": 0.20380924881016746,
+      "rmse_gap_naive_minus_realtime": -0.03646812914642672
+    },
+    "diebold_mariano": {
+      "n": 67,
+      "mean_loss_diff_naive_minus_realtime": -0.0202431506014059,
+      "dm_statistic": -0.8493947673039032,
+      "dm_p_value": 0.3987322224173002,
+      "lag": 1
+    },
+    "bootstrap": {
+      "reps": 2000,
+      "block": 8,
+      "seed": 20261110,
+      "gap_p05": -0.09292878950092893,
+      "gap_p50": -0.03522703329161572,
+      "gap_p95": 0.02782761625436176,
+      "gap_ci90_low": -0.09292878950092893,
+      "gap_ci90_high": 0.02782761625436176,
+      "share_of_reps_gap_negative": 0.826
+    }
+  },
+  "synthetic_gate": {
+    "planted_expected_mean_revision": 0.06,
+    "recovered_mean_revision": 0.05923183113990132,
+    "planted_expected_mean_abs_revision": 0.16520058377971944,
+    "recovered_mean_abs_revision": 0.1657292279775734,
+    "n": 215
+  }
+}

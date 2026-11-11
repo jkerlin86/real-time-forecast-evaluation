@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "real-time-forecast-evaluation"
+version = "0.1.0"
+description = "The Revision Is the Story: a real-time forecast evaluation with vintage data. A fixed autoregressive benchmark is estimated strictly on as-known-at-the-time vintages and against final data, and the accuracy gap is reported with its uncertainty."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "matplotlib==3.10.7",
+    "numpy==2.3.5",
+    "openpyxl==3.1.5",
+    "pyarrow==22.0.0",
+    "xlrd==2.0.1",
+    "pandas==2.3.3",
+    "pyarrow==22.0.0",
+    "requests==2.32.5",
+    "scipy==1.18.1",
+    "statsmodels==0.14.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.1",
+    "ruff==0.14.4",
+]
+notebooks = [
+    "ipykernel==7.1.0",
+    "nbclient==0.10.2",
+    "nbformat==5.10.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
